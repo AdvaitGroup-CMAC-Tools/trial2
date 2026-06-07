@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Conference Room Booking — Advait Group</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#1A4084;--blue2:#3A66AA;--blue3:#83B1DC;--blue4:#EBF2FF;
+  --red:#b52a1c;--red2:#FDECEA;
+  --green:#1a7a3a;--green2:#EAF6EE;
+  --amber:#b87000;--amber2:#FFF8E1;--amber3:#FFD54F;
+  --bg:#f4f6fb;--card:#fff;--border:#dde4f0;
+  --text:#1C1C1C;--text2:#5a6474;--text3:#8a96a8;
+  --radius:10px;--radius2:6px;
+}
+body{font-family:'Inter',Calibri,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.app{max-width:800px;margin:0 auto;padding:24px 16px 48px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1A4084;color:#fff;padding:12px 24px;border-radius:30px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.18);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:9999;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.green{background:#1a7a3a;}
+.toast.red{background:#b52a1c;}
+.toast.amber{background:#b87000;}
+
+/* TICKER */
+.ticker-wrap{background:var(--blue);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;height:36px;display:flex;align-items:center;transition:background .4s;}
+.ticker-wrap.all-busy{background:var(--red);}
+.ticker-wrap.one-busy{background:var(--amber);}
+.ticker-inner{overflow:hidden;flex:1;height:100%;}
+.ticker-text{display:inline-block;white-space:nowrap;font-size:12px;font-weight:500;color:#fff;line-height:36px;padding-right:80px;animation:tick 28s linear infinite;}
+.ticker-text.fast{animation-duration:14s;}
+@keyframes tick{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+.tdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle;}
+.tdot-free{background:#5be38a;}
+.tdot-busy{background:#ffccc9;animation:blink 1s infinite;}
+.tdot-sched{background:#FFD54F;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.hdr-left{display:flex;align-items:center;gap:10px;}
+.hdr-icon{font-size:22px;}
+.hdr-title{font-size:20px;font-weight:600;color:var(--text);}
+.about-btn{font-size:12px;color:var(--blue);background:var(--blue4);border:none;border-radius:20px;padding:5px 14px;cursor:pointer;font-weight:500;}
+.about-btn:hover{background:var(--blue);color:#fff;}
+.page-sub{font-size:12px;color:var(--text2);margin-bottom:20px;}
+
+/* ABOUT */
+.about-panel{display:none;background:var(--card);border:1px solid var(--blue3);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;}
+.about-panel.show{display:block;}
+.about-top{font-size:13px;font-weight:600;color:var(--blue);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #d0e4f5;display:flex;justify-content:space-between;}
+.close-btn{font-size:11px;color:var(--text3);cursor:pointer;}
+.about-body{font-size:13px;color:var(--text);line-height:1.75;}
+.about-body p{margin-bottom:8px;}
+.about-body ul{padding-left:18px;margin-bottom:8px;}
+.about-body li{margin-bottom:4px;color:var(--text2);}
+.contact-card{display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px 14px;background:var(--blue4);border-radius:var(--radius2);border:1px solid var(--blue3);}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;}
+.cname{font-size:13px;font-weight:500;color:var(--blue);}
+.cdept{font-size:11px;color:var(--blue2);margin-top:1px;}
+
+/* ROOM GRID */
+.room-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:580px){.room-grid{grid-template-columns:1fr;}}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+
+/* ROOM HEADER */
+.room-hdr{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
+.room-icon{width:42px;height:42px;border-radius:var(--radius2);background:var(--blue4);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.room-name{font-size:14px;font-weight:600;color:var(--text);line-height:1.3;}
+.room-floor{font-size:11px;color:var(--blue2);margin-top:2px;font-weight:500;}
+.cap-tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;color:var(--blue2);background:var(--blue4);border-radius:10px;padding:1px 8px;margin-top:3px;}
+.sbadge{margin-left:auto;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;}
+.badge-free{background:var(--green2);color:var(--green);}
+.badge-busy{background:var(--red2);color:var(--red);}
+.badge-sched{background:var(--amber2);color:var(--amber);}
+
+/* STATUS ROW */
+.info-row{font-size:12px;color:var(--text2);background:var(--bg);border-radius:var(--radius2);padding:8px 11px;min-height:34px;display:flex;align-items:center;gap:7px;margin-bottom:11px;line-height:1.4;}
+.idot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot-free{background:#27ae60;}
+.dot-busy{background:#e74c3c;animation:pulse 1.2s infinite;}
+.dot-sched{background:#f0a500;animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* FIELDS */
+.field-row{display:flex;gap:8px;margin-bottom:10px;}
+select,input[type=text],input[type=date],input[type=time]{height:34px;font-size:13px;padding:0 10px;border-radius:var(--radius2);border:1px solid var(--border);background:#fff;color:var(--text);font-family:inherit;outline:none;width:100%;}
+select:focus,input:focus{border-color:var(--blue2);}
+.field-row select{flex:1.2;}
+.field-row input{flex:1.5;min-width:0;}
+::placeholder{color:var(--text3);}
+
+/* BUTTONS */
+.btn{height:35px;padding:0 14px;border-radius:var(--radius2);font-size:13px;font-weight:500;cursor:pointer;border:none;white-space:nowrap;font-family:inherit;width:100%;transition:opacity .15s;}
+.btn:active{opacity:.85;}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-disabled{background:#eef1f7;color:var(--text3);cursor:not-allowed;}
+
+/* MODE TOGGLE */
+.mode-toggle{display:flex;border:1.5px solid var(--blue3);border-radius:var(--radius2);overflow:hidden;margin-bottom:10px;}
+.mode-btn{flex:1;height:32px;border:none;background:transparent;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .18s;}
+.mode-btn.active{background:var(--blue);color:#fff;}
+.mode-btn:not(.active):hover{background:var(--blue4);}
+
+/* DURATION PANEL */
+.dur-panel{display:none;background:var(--blue4);border:1px solid var(--blue3);border-radius:var(--radius2);padding:12px 14px;margin-top:10px;}
+.dur-panel.show{display:block;}
+.dur-panel-label{font-size:12px;font-weight:600;color:var(--blue);margin-bottom:8px;}
+.dur-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
+.dur-row select{flex:1;min-width:120px;height:32px;}
+.dur-divider{font-size:11px;color:var(--text3);white-space:nowrap;}
+.cust-wrap{display:flex;align-items:center;gap:5px;flex:1;min-width:90px;}
+.cust-wrap input{height:32px;flex:1;}
+.dur-btns{display:flex;gap:8px;}
+.btn-sm-ok{height:32px;padding:0 14px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius2);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;}
+.btn-sm-cx{height:32px;padding:0 12px;background:transparent;color:var(--blue);border:1px solid var(--blue3);border-radius:var(--radius2);font-size:13px;cursor:pointer;font-family:inherit;}
+
+/* SCHEDULE PANEL */
+.sched-panel{display:none;background:var(--amber2);border:1px solid var(--amber3);border-radius:var(--radius2);padding:12px 14px;margin-top:10px;}
+.sched-panel.show{display:block;}
+.sched-panel-label{font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px;}
+.sched-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
+.sched-row input[type=date],.sched-row input[type=time]{flex:1;min-width:100px;height:32px;}
+.sched-row span{font-size:11px;color:var(--amber);font-weight:600;white-space:nowrap;}
+.sched-dur-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
+.sched-dur-row select{flex:1;min-width:120px;height:32px;}
+.sched-cust-wrap{display:flex;align-items:center;gap:5px;flex:1;min-width:90px;}
+.sched-cust-wrap input{height:32px;flex:1;}
+
+/* TIMER BAR */
+.timer-wrap{margin-top:10px;display:none;}
+.timer-wrap.show{display:block;}
+.timer-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.timer-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;}
+.timer-rem{font-size:12px;font-weight:600;color:var(--blue);font-variant-numeric:tabular-nums;}
+.timer-track{height:5px;background:#e2e8f4;border-radius:3px;overflow:hidden;}
+.timer-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--blue2));transition:width 1s linear;}
+.timer-fill.warn{background:linear-gradient(90deg,#e67e22,#f39c12);}
+.timer-fill.crit{background:linear-gradient(90deg,var(--red),#e74c3c);}
+
+/* EXTEND PANEL */
+.ext-wrap{margin-top:10px;display:none;}
+.ext-wrap.show{display:block;}
+.ext-inner{padding:10px 12px;background:var(--green2);border:1px solid #b8e8cb;border-radius:var(--radius2);}
+.ext-label{font-size:11px;font-weight:600;color:var(--green);margin-bottom:7px;}
+.ext-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.ext-row select{flex:1;min-width:110px;height:32px;font-size:12px;}
+.ext-cust{display:none;flex:1;min-width:90px;}
+.ext-cust input{height:32px;width:100%;}
+.btn-ext{height:32px;padding:0 14px;background:var(--green);color:#fff;border:none;border-radius:var(--radius2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;}
+.btn-ext-cx{height:32px;padding:0 10px;background:transparent;color:var(--green);border:1px solid #b8e8cb;border-radius:var(--radius2);font-size:12px;cursor:pointer;font-family:inherit;}
+
+/* SCHEDULE QUEUE */
+.sched-queue{margin-top:10px;display:none;}
+.sched-queue.show{display:block;}
+.sched-q-hdr{font-size:11px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.sched-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--amber2);border:1px solid var(--amber3);border-radius:var(--radius2);margin-bottom:5px;font-size:12px;}
+.sched-item-info{flex:1;line-height:1.4;}
+.sched-item-time{font-weight:600;color:var(--amber);font-size:11px;white-space:nowrap;}
+.sched-item-del{width:22px;height:22px;border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:13px;border-radius:4px;flex-shrink:0;}
+.sched-item-del:hover{background:var(--red2);color:var(--red);}
+
+/* LOG */
+.log-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.log-hdr{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px;}
+.log-list{display:flex;flex-direction:column;gap:4px;max-height:160px;overflow-y:auto;}
+.log-item{font-size:12px;padding:6px 10px;border-radius:var(--radius2);background:var(--bg);display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;}
+.ld{color:var(--text);font-weight:500;flex-shrink:0;}
+.lroom{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--blue4);color:var(--blue);flex-shrink:0;}
+.lm{color:var(--text2);font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lt{color:var(--text3);font-size:11px;flex-shrink:0;}
+.lc{color:var(--green);font-size:11px;}
+.lr{color:var(--red);font-size:11px;}
+.no-log{font-size:12px;color:var(--text3);font-style:italic;}
+.rfhint{font-size:11px;color:var(--text3);text-align:right;margin-top:7px;display:flex;align-items:center;justify-content:flex-end;gap:5px;}
+.fb-dot{width:7px;height:7px;border-radius:50%;background:#e74c3c;flex-shrink:0;transition:background .3s;}
+.fb-dot.live{background:#27ae60;animation:pr 2s ease-out infinite;}
+@keyframes pr{0%{opacity:1;transform:scale(1)}70%{opacity:0;transform:scale(2.2)}100%{opacity:0}}
+
+/* ── NEW FEATURES CSS ── */
+.bookedby-row{display:flex;gap:8px;margin-bottom:10px;}
+.bookedby-row input{width:100%;}
+.dual-btn-row{display:flex;gap:8px;margin-top:8px;}
+.dual-btn-row .btn{flex:1;}
+.ext-msg{font-size:11px;color:var(--amber);margin-bottom:5px;min-height:13px;}
+.invite-btn{height:35px;padding:0 14px;background:var(--blue4);color:var(--blue);border:1px solid var(--blue3);border-radius:var(--radius2);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;width:100%;margin-top:8px;}
+.invite-btn:hover{background:var(--blue);color:#fff;}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal-box{background:#fff;border-radius:10px;padding:22px;width:94%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.22);}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.modal-title{font-size:14px;font-weight:600;color:var(--text);}
+.modal-close{background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;padding:0;line-height:1;}
+.mlbl{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px;display:block;}
+.minp{width:100%;height:34px;font-size:13px;padding:0 10px;border-radius:var(--radius2);border:1px solid var(--border);font-family:inherit;outline:none;margin-bottom:12px;}
+.minp:focus{border-color:var(--blue2);}
+.tag-wrap{min-height:36px;border:1px solid var(--border);border-radius:var(--radius2);padding:4px 8px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;cursor:text;margin-bottom:12px;}
+.tag-wrap:focus-within{border-color:var(--blue2);}
+.tag-pill{display:inline-flex;align-items:center;gap:4px;background:var(--blue4);color:var(--blue);border-radius:20px;font-size:12px;padding:2px 9px;}
+.tag-pill button{background:none;border:none;color:var(--blue);cursor:pointer;font-size:14px;padding:0;line-height:1;}
+.tag-inp{border:none;outline:none;font-size:13px;min-width:130px;flex:1;font-family:inherit;padding:2px 4px;}
+.inv-preview{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius2);padding:11px 13px;font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:12px;white-space:pre-wrap;font-family:monospace;}
+.modal-btns{display:flex;gap:8px;}
+.btn-copy{flex:1;height:34px;background:var(--blue4);color:var(--blue);border:1px solid var(--blue3);border-radius:var(--radius2);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;}
+.btn-copy:hover,.btn-outlook:hover{opacity:.85;}
+.btn-outlook{flex:1;height:34px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius2);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;}
+.btn-outlook:disabled{background:#eef1f7;color:var(--text3);cursor:not-allowed;}
+.copy-ok{font-size:11px;color:var(--green);margin-top:5px;min-height:15px;}
+.log-sub{font-size:11px;color:var(--text3);margin-top:2px;width:100%;}
+.log-att{font-size:11px;color:var(--blue2);cursor:pointer;text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="toast" id="toast"></div>
+
+<!-- TICKER -->
+<div class="ticker-wrap" id="ticker-bar">
+  <div class="ticker-inner">
+    <div class="ticker-text" id="ticker-text">
+      <span class="tdot tdot-free"></span>Both conference rooms are free — book your slot before heading in
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-left"><span class="hdr-icon">🏢</span><div class="hdr-title">Conference Room Booking</div></div>
+  <button class="about-btn" onclick="toggleAbout()">ⓘ About</button>
+</div>
+<div class="page-sub">Room availability board · Advait Group (AETL &amp; AGPL)</div>
+
+<!-- ABOUT -->
+<div class="about-panel" id="about-panel">
+  <div class="about-top">About Conference Room Booking <span class="close-btn" onclick="toggleAbout()">✕ Close</span></div>
+  <div class="about-body">
+    <p>Real-time booking for Advait Group's two conference rooms — synced live across all devices.</p>
+    <ul>
+      <li><strong>Gyaan</strong> — 2nd Floor · Capacity 12</li>
+      <li><strong>Dharma</strong> — 1st Floor · Capacity 14</li>
+    </ul>
+    <p><strong>Book Now</strong> — instantly occupies the room. <strong>Schedule Ahead</strong> — queue future bookings (multiple allowed, conflict-checked). Scheduled meetings auto-start at their time. <strong>Extend</strong> — add more time to a live booking.</p>
+    <div class="contact-card">
+      <div class="avatar">HR</div>
+      <div><div class="cname">Sneha Christian</div><div class="cdept">Corporate — HR</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ROOM GRID -->
+<div class="room-grid">
+
+  <!-- GYAAN -->
+  <div class="card">
+    <div class="room-hdr">
+      <div class="room-icon">🧠</div>
+      <div>
+        <div class="room-name">Gyaan Conference Room</div>
+        <div class="room-floor">📍 2nd Floor</div>
+        <div class="cap-tag">👥 Capacity: 12</div>
+      </div>
+      <div class="sbadge badge-free" id="badge-gyaan">Available</div>
+    </div>
+    <div class="info-row"><div class="idot dot-free" id="dot-gyaan"></div><span id="info-gyaan">Gyaan is free — no booking now.</span></div>
+    <div class="field-row">
+      <select id="dept-gyaan" onchange="onDeptChange('gyaan')">
+        <option value="">Select department</option>
+        <option>AGPL-GH2-EPC</option><option>AGPL-Solar-EPC</option><option>AGPL-Electrolizer-MFG</option><option>AGPL-NRE-BESS-EPC</option>
+        <option>Corporate - F&amp;A</option><option>Corporate - CP&amp;P</option><option>Corporate - CMAC</option><option>Corporate - CS</option>
+        <option>Corporate - HR</option><option>Corporate - Support Staff</option>
+        <option>AGPL-NRE-BESS-MFG</option><option>AGPL-FUELCELL-MFG</option>
+        <option>PTS-Liveline-EPC</option><option>PTS-ACS-OPGW-MFG</option><option>PTS-DISCOM-EPC</option><option>PTS-Tools-MFG</option>
+        <option>PTS-BD</option><option>PTS-ERS-MFG</option><option>PTS-HTLS-EPC</option><option>NRE-Sustainability Consultancy</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field-row">
+      <input type="text" id="meeting-gyaan" placeholder="Meeting subject / name" maxlength="60"/>
+    </div>
+    <div class="bookedby-row">
+      <input type="text" id="bookedby-gyaan" placeholder="Your name (booked by) *" maxlength="60"/>
+    </div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="mode-now-gyaan" onclick="setMode('gyaan','now')">⚡ Book Now</button>
+      <button class="mode-btn" id="mode-sched-gyaan" onclick="setMode('gyaan','sched')">📅 Schedule Ahead</button>
+    </div>
+    <button class="btn btn-disabled" id="btn-gyaan" onclick="mainAction('gyaan')">Select dept first</button>
+    <div class="dual-btn-row" id="dual-row-gyaan" style="display:none"><button class="btn btn-primary" onclick="openSchedPanel('gyaan')">&#x1F4C5; Schedule Ahead</button></div>
+    <button class="invite-btn" id="invite-btn-gyaan" style="display:none" onclick="openInviteModal('gyaan')">&#x1F4E7; Invite Attendees</button>
+
+    <!-- BOOK NOW: Duration Panel -->
+    <div class="dur-panel" id="dur-gyaan">
+      <div class="dur-panel-label" id="dur-label-gyaan">How long do you need Gyaan?</div>
+      <div class="dur-row">
+        <select id="dur-sel-gyaan" onchange="onDurSelChange('gyaan')">
+          <option value="15 min">15 minutes</option>
+          <option value="30 min" selected>30 minutes</option>
+          <option value="45 min">45 minutes</option>
+          <option value="1 hr">1 hour</option>
+          <option value="1.5 hrs">1.5 hours</option>
+          <option value="2 hrs">2 hours</option>
+          <option value="3 hrs">3 hours</option>
+          <option value="Until released">Until I release it</option>
+          <option value="custom">Custom…</option>
+        </select>
+        <span class="dur-divider">or</span>
+        <div class="cust-wrap" id="cust-gyaan" style="display:none">
+          <input type="text" id="cust-inp-gyaan" placeholder="e.g. 20 min"/>
+        </div>
+      </div>
+      <div class="dur-btns">
+        <button class="btn-sm-ok" onclick="confirmBook('gyaan')">Confirm</button>
+        <button class="btn-sm-cx" onclick="closeDurPanel('gyaan')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- SCHEDULE: Schedule Panel -->
+    <div class="sched-panel" id="sched-gyaan">
+      <div class="sched-panel-label">📅 Schedule Gyaan ahead</div>
+      <div class="sched-row">
+        <span>Date</span><input type="date" id="sd-date-gyaan"/>
+        <span>Start</span><input type="time" id="sd-time-gyaan"/>
+      </div>
+      <div class="sched-dur-row">
+        <span style="font-size:11px;color:var(--amber);font-weight:600;white-space:nowrap;">Duration</span>
+        <select id="sd-dur-gyaan" onchange="onSchedDurChange('gyaan')">
+          <option value="30 min">30 min</option><option value="45 min">45 min</option>
+          <option value="1 hr" selected>1 hour</option><option value="1.5 hrs">1.5 hrs</option>
+          <option value="2 hrs">2 hrs</option><option value="3 hrs">3 hrs</option>
+          <option value="custom">Custom…</option>
+        </select>
+        <div class="sched-cust-wrap" id="sd-cust-gyaan" style="display:none">
+          <input type="text" id="sd-cust-inp-gyaan" placeholder="e.g. 90 min"/>
+        </div>
+      </div>
+      <div class="dur-btns">
+        <button class="btn-sm-ok" onclick="confirmSchedule('gyaan')">Add to Schedule</button>
+        <button class="btn-sm-cx" onclick="closeSchedPanel('gyaan')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- TIMER BAR -->
+    <div class="timer-wrap" id="timer-gyaan">
+      <div class="timer-top"><span class="timer-label">⏱ Time remaining</span><span class="timer-rem" id="timer-rem-gyaan">—</span></div>
+      <div class="timer-track"><div class="timer-fill" id="timer-fill-gyaan"></div></div>
+    </div>
+
+    <!-- EXTEND -->
+    <div class="ext-wrap" id="ext-gyaan">
+      <div class="ext-inner">
+        <div class="ext-label">➕ Extend current booking</div>
+        <div class="ext-msg" id="ext-msg-gyaan"></div>
+        <div class="ext-row">
+          <select id="ext-sel-gyaan" onchange="onExtSelChange('gyaan')">
+            <option value="15 min">+15 min</option><option value="30 min" selected>+30 min</option>
+            <option value="45 min">+45 min</option><option value="1 hr">+1 hr</option>
+            <option value="2 hrs">+2 hrs</option><option value="custom">Custom…</option>
+          </select>
+          <div class="ext-cust" id="ext-cust-gyaan"><input type="text" id="ext-cust-inp-gyaan" placeholder="e.g. 20 min"/></div>
+          <button class="btn-ext" onclick="extendBook('gyaan')">Extend</button>
+          <button class="btn-ext-cx" onclick="closeExt('gyaan')">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE QUEUE -->
+    <div class="sched-queue" id="sq-gyaan">
+      <div class="sched-q-hdr">📅 Upcoming scheduled</div>
+      <div id="sq-list-gyaan"></div>
+    </div>
+  </div>
+
+  <!-- DHARMA -->
+  <div class="card">
+    <div class="room-hdr">
+      <div class="room-icon">⚖️</div>
+      <div>
+        <div class="room-name">Dharma Conference Room</div>
+        <div class="room-floor">📍 1st Floor</div>
+        <div class="cap-tag">👥 Capacity: 14</div>
+      </div>
+      <div class="sbadge badge-free" id="badge-dharma">Available</div>
+    </div>
+    <div class="info-row"><div class="idot dot-free" id="dot-dharma"></div><span id="info-dharma">Dharma is free — no booking now.</span></div>
+    <div class="field-row">
+      <select id="dept-dharma" onchange="onDeptChange('dharma')">
+        <option value="">Select department</option>
+        <option>AGPL-GH2-EPC</option><option>AGPL-Solar-EPC</option><option>AGPL-Electrolizer-MFG</option><option>AGPL-NRE-BESS-EPC</option>
+        <option>Corporate - F&amp;A</option><option>Corporate - CP&amp;P</option><option>Corporate - CMAC</option><option>Corporate - CS</option>
+        <option>Corporate - HR</option><option>Corporate - Support Staff</option>
+        <option>AGPL-NRE-BESS-MFG</option><option>AGPL-FUELCELL-MFG</option>
+        <option>PTS-Liveline-EPC</option><option>PTS-ACS-OPGW-MFG</option><option>PTS-DISCOM-EPC</option><option>PTS-Tools-MFG</option>
+        <option>PTS-BD</option><option>PTS-ERS-MFG</option><option>PTS-HTLS-EPC</option><option>NRE-Sustainability Consultancy</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field-row">
+      <input type="text" id="meeting-dharma" placeholder="Meeting subject / name" maxlength="60"/>
+    </div>
+    <div class="bookedby-row">
+      <input type="text" id="bookedby-dharma" placeholder="Your name (booked by) *" maxlength="60"/>
+    </div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="mode-now-dharma" onclick="setMode('dharma','now')">⚡ Book Now</button>
+      <button class="mode-btn" id="mode-sched-dharma" onclick="setMode('dharma','sched')">📅 Schedule Ahead</button>
+    </div>
+    <button class="btn btn-disabled" id="btn-dharma" onclick="mainAction('dharma')">Select dept first</button>
+    <div class="dual-btn-row" id="dual-row-dharma" style="display:none"><button class="btn btn-primary" onclick="openSchedPanel('dharma')">&#x1F4C5; Schedule Ahead</button></div>
+    <button class="invite-btn" id="invite-btn-dharma" style="display:none" onclick="openInviteModal('dharma')">&#x1F4E7; Invite Attendees</button>
+
+    <div class="dur-panel" id="dur-dharma">
+      <div class="dur-panel-label" id="dur-label-dharma">How long do you need Dharma?</div>
+      <div class="dur-row">
+        <select id="dur-sel-dharma" onchange="onDurSelChange('dharma')">
+          <option value="15 min">15 minutes</option>
+          <option value="30 min" selected>30 minutes</option>
+          <option value="45 min">45 minutes</option>
+          <option value="1 hr">1 hour</option>
+          <option value="1.5 hrs">1.5 hours</option>
+          <option value="2 hrs">2 hours</option>
+          <option value="3 hrs">3 hours</option>
+          <option value="Until released">Until I release it</option>
+          <option value="custom">Custom…</option>
+        </select>
+        <span class="dur-divider">or</span>
+        <div class="cust-wrap" id="cust-dharma" style="display:none">
+          <input type="text" id="cust-inp-dharma" placeholder="e.g. 20 min"/>
+        </div>
+      </div>
+      <div class="dur-btns">
+        <button class="btn-sm-ok" onclick="confirmBook('dharma')">Confirm</button>
+        <button class="btn-sm-cx" onclick="closeDurPanel('dharma')">Cancel</button>
+      </div>
+    </div>
+
+    <div class="sched-panel" id="sched-dharma">
+      <div class="sched-panel-label">📅 Schedule Dharma ahead</div>
+      <div class="sched-row">
+        <span>Date</span><input type="date" id="sd-date-dharma"/>
+        <span>Start</span><input type="time" id="sd-time-dharma"/>
+      </div>
+      <div class="sched-dur-row">
+        <span style="font-size:11px;color:var(--amber);font-weight:600;white-space:nowrap;">Duration</span>
+        <select id="sd-dur-dharma" onchange="onSchedDurChange('dharma')">
+          <option value="30 min">30 min</option><option value="45 min">45 min</option>
+          <option value="1 hr" selected>1 hour</option><option value="1.5 hrs">1.5 hrs</option>
+          <option value="2 hrs">2 hrs</option><option value="3 hrs">3 hrs</option>
+          <option value="custom">Custom…</option>
+        </select>
+        <div class="sched-cust-wrap" id="sd-cust-dharma" style="display:none">
+          <input type="text" id="sd-cust-inp-dharma" placeholder="e.g. 90 min"/>
+        </div>
+      </div>
+      <div class="dur-btns">
+        <button class="btn-sm-ok" onclick="confirmSchedule('dharma')">Add to Schedule</button>
+        <button class="btn-sm-cx" onclick="closeSchedPanel('dharma')">Cancel</button>
+      </div>
+    </div>
+
+    <div class="timer-wrap" id="timer-dharma">
+      <div class="timer-top"><span class="timer-label">⏱ Time remaining</span><span class="timer-rem" id="timer-rem-dharma">—</span></div>
+      <div class="timer-track"><div class="timer-fill" id="timer-fill-dharma"></div></div>
+    </div>
+
+    <div class="ext-wrap" id="ext-dharma">
+      <div class="ext-inner">
+        <div class="ext-label">➕ Extend current booking</div>
+        <div class="ext-msg" id="ext-msg-dharma"></div>
+        <div class="ext-row">
+          <select id="ext-sel-dharma" onchange="onExtSelChange('dharma')">
+            <option value="15 min">+15 min</option><option value="30 min" selected>+30 min</option>
+            <option value="45 min">+45 min</option><option value="1 hr">+1 hr</option>
+            <option value="2 hrs">+2 hrs</option><option value="custom">Custom…</option>
+          </select>
+          <div class="ext-cust" id="ext-cust-dharma"><input type="text" id="ext-cust-inp-dharma" placeholder="e.g. 20 min"/></div>
+          <button class="btn-ext" onclick="extendBook('dharma')">Extend</button>
+          <button class="btn-ext-cx" onclick="closeExt('dharma')">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sched-queue" id="sq-dharma">
+      <div class="sched-q-hdr">📅 Upcoming scheduled</div>
+      <div id="sq-list-dharma"></div>
+    </div>
+  </div>
+
+</div><!-- /room-grid -->
+
+<!-- LOG -->
+<div class="log-card">
+  <div class="log-hdr">Activity Log — Both Rooms</div>
+  <div class="log-list" id="log-list"><div class="no-log">No activity yet.</div></div>
+  <div class="rfhint"><div class="fb-dot" id="fb-dot"></div><span id="fb-txt">Connecting…</span></div>
+</div>
+
+
+<!-- INVITE MODAL -->
+<div class="modal-bg" id="inv-modal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <span class="modal-title">&#x1F4E7; Invite Attendees</span>
+      <button class="modal-close" onclick="closeInvModal()">&#x2715;</button>
+    </div>
+    <label class="mlbl">Your email (optional)</label>
+    <input class="minp" type="email" id="inv-from" placeholder="yourname@advaitgroup.co.in"/>
+    <label class="mlbl">Attendee emails — press Enter to add</label>
+    <div class="tag-wrap" id="tag-wrap" onclick="document.getElementById('tag-inp').focus()">
+      <input class="tag-inp" id="tag-inp" placeholder="email@advaitgroup.co.in" onkeydown="handleTagKey(event)"/>
+    </div>
+    <label class="mlbl">Invite preview</label>
+    <div class="inv-preview" id="inv-preview"></div>
+    <div class="modal-btns">
+      <button class="btn-copy" onclick="copyInv()">&#x1F4CB; Copy invite</button>
+      <button class="btn-outlook" id="btn-outlook" onclick="openOutlook()" disabled>&#x1F4E8; Open in Outlook</button>
+    </div>
+    <div class="copy-ok" id="copy-ok"></div>
+  </div>
+</div>
+</div><!-- /app -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+// ── FIREBASE ──
+firebase.initializeApp({
+  apiKey:"AIzaSyCbMH_EmTM81XLFwXSzZeokpXOKVMxvuXE",
+  authDomain:"advait-confrooms.firebaseapp.com",
+  databaseURL:"https://advait-confrooms-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"advait-confrooms",
+  storageBucket:"advait-confrooms.firebasestorage.app",
+  messagingSenderId:"362829613915",
+  appId:"1:362829613915:web:35212106943f8fdc2a687e"
+});
+const db = firebase.database();
+
+// Show live connection status
+db.ref('.info/connected').on('value', snap=>{
+  const live=snap.val()===true;
+  document.getElementById('fb-dot').className='fb-dot'+(live?' live':'');
+  document.getElementById('fb-txt').textContent=live?'Live · real-time':'Connecting…';
+  if(live){ clearTimeout(window._fbt); document.getElementById('fb-txt').style.cssText=''; document.getElementById('fb-dot').style.cssText=''; }
+});
+// After 6s still not connected — show clear message
+window._fbt=setTimeout(()=>{
+  const el=document.getElementById('fb-txt');
+  if(el&&el.textContent==='Connecting…'){
+    el.textContent='Not connected — needs https:// to sync';
+    el.style.color='var(--red)';
+    document.getElementById('fb-dot').style.background='var(--red)';
+  }
+},6000);
+
+// ── STATE ──
+const ROOMS = { gyaan:{label:'Gyaan'}, dharma:{label:'Dharma'} };
+const active    = { gyaan:null, dharma:null };   // current live booking
+const schedules = { gyaan:{}, dharma:{} };       // future scheduled slots
+const mode      = { gyaan:'now', dharma:'now' }; // 'now' or 'sched'
+
+// ── UTILS ──
+function tsNow(){ return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}); }
+function fmtTime(ms){ return new Date(ms).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}); }
+function fmtDate(ms){
+  const d=new Date(ms), t=new Date(); t.setHours(0,0,0,0);
+  const tm=new Date(t); tm.setDate(tm.getDate()+1);
+  if(d>=t&&d<tm) return 'Today';
+  if(d>=tm&&d<new Date(tm.getTime()+86400000)) return 'Tomorrow';
+  return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+}
+function fmtRem(ms){
+  if(ms<=0) return '0s';
+  const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);
+  if(h>0) return h+'h'+(m?' '+m+'m':'');
+  if(m>0) return m+'m'+(s?' '+s+'s':'');
+  return s+'s';
+}
+function parseMs(str){
+  if(!str||str==='Until released') return null;
+  str=str.trim().toLowerCase();
+  const h=str.match(/(\d+\.?\d*)\s*h/), m=str.match(/(\d+\.?\d*)\s*m/);
+  let ms=0;
+  if(h) ms+=parseFloat(h[1])*3600000;
+  if(m) ms+=parseFloat(m[1])*60000;
+  return ms>0?ms:null;
+}
+function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+function toggleAbout(){ document.getElementById('about-panel').classList.toggle('show'); }
+function showToast(msg,type,dur){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+(type||'');
+  setTimeout(()=>t.classList.add('show'),10);
+  setTimeout(()=>t.classList.remove('show'),dur||3000);
+}
+
+// ── NEXT SCHEDULED ──
+function nextSched(room){
+  const list=Object.values(schedules[room]).filter(s=>s.scheduledStart>Date.now());
+  if(!list.length) return null;
+  return list.sort((a,b)=>a.scheduledStart-b.scheduledStart)[0];
+}
+
+// ── TICKER ──
+function updateTicker(){
+  const bar=document.getElementById('ticker-bar'), el=document.getElementById('ticker-text');
+  const gA=!!active.gyaan, dA=!!active.dharma;
+  if(!gA&&!dA&&!Object.keys(schedules.gyaan).length&&!Object.keys(schedules.dharma).length){
+    bar.className='ticker-wrap';
+    el.innerHTML='<span class="tdot tdot-free"></span>Both conference rooms are free — book your slot before heading in';
+    el.className='ticker-text'; return;
+  }
+  if(gA&&dA){
+    bar.className='ticker-wrap all-busy';
+    el.innerHTML='<span class="tdot tdot-busy"></span>⚠ ALL ROOMS OCCUPIED &nbsp;·&nbsp; Gyaan: '+active.gyaan.dept+' &nbsp;|&nbsp; Dharma: '+active.dharma.dept;
+    el.className='ticker-text fast'; return;
+  }
+  bar.className='ticker-wrap one-busy';
+  const parts=[];
+  if(gA) parts.push('<span class="tdot tdot-busy"></span>Gyaan occupied · '+active.gyaan.dept);
+  else{ parts.push('<span class="tdot tdot-free"></span>Gyaan free'); const ns=nextSched('gyaan'); if(ns) parts.push('<span class="tdot tdot-sched"></span>Gyaan scheduled '+fmtDate(ns.scheduledStart)+' '+fmtTime(ns.scheduledStart)); }
+  if(dA) parts.push('<span class="tdot tdot-busy"></span>Dharma occupied · '+active.dharma.dept);
+  else{ parts.push('<span class="tdot tdot-free"></span>Dharma free'); const ns=nextSched('dharma'); if(ns) parts.push('<span class="tdot tdot-sched"></span>Dharma scheduled '+fmtDate(ns.scheduledStart)+' '+fmtTime(ns.scheduledStart)); }
+  el.innerHTML=parts.join(' &nbsp;·&nbsp; ');
+  el.className='ticker-text';
+}
+
+// ── RENDER ROOM STATUS ──
+function renderRoom(room){
+  const a=active[room], dept=document.getElementById('dept-'+room).value;
+  const badge=document.getElementById('badge-'+room);
+  const dot=document.getElementById('dot-'+room);
+  const info=document.getElementById('info-'+room);
+  const btn=document.getElementById('btn-'+room);
+  const extWrap=document.getElementById('ext-'+room);
+  extWrap.classList.remove('show');
+  const dRow=document.getElementById('dual-row-'+room); if(dRow) dRow.style.display='none';
+  const iBtn=document.getElementById('invite-btn-'+room); if(iBtn) iBtn.style.display='none';
+
+  if(!a){
+    // ROOM FREE
+    badge.className='sbadge badge-free'; badge.textContent='Available';
+    dot.className='idot dot-free';
+    const ns=nextSched(room);
+    if(ns){
+      const toStart=ns.scheduledStart-Date.now();
+      info.textContent=ROOMS[room].label+' free until '+fmtTime(ns.scheduledStart)+' · '+ns.dept+(ns.meeting?' · '+ns.meeting:'')+' in '+fmtRem(toStart);
+    } else {
+      info.textContent=ROOMS[room].label+' is free — no booking now.';
+    }
+    if(!dept){ btn.className='btn btn-disabled'; btn.textContent='Select dept first'; }
+    else if(mode[room]==='sched'){ btn.className='btn btn-primary'; btn.textContent='📅 Add Scheduled Booking'; }
+    else{ btn.className='btn btn-primary'; btn.textContent='⚡ Book Now'; }
+  } else {
+    // ROOM OCCUPIED
+    badge.className='sbadge badge-busy'; badge.textContent='Occupied';
+    dot.className='idot dot-busy';
+    const rem=a.claimExpiry?fmtRem(Math.max(0,a.claimExpiry-Date.now())):'∞';
+    info.textContent='Booked · '+a.dept+(a.meeting?' · '+a.meeting:'')+(a.duration?' · '+a.duration:'')+' · '+rem+' left';
+    if(dept===a.dept){
+      btn.className='btn btn-red'; btn.textContent='Release — Done';
+      if(a.claimExpiry){ extWrap.classList.add('show'); buildExtOptions(room); }
+      if(dRow) dRow.style.display='flex';
+      if(iBtn) iBtn.style.display='block';
+    } else if(dept&&mode[room]==='sched'){
+      btn.className='btn btn-primary'; btn.textContent='📅 Add Scheduled Booking';
+      if(iBtn) iBtn.style.display='block';
+    } else if(dept){
+      btn.className='btn btn-disabled'; btn.textContent='Occupied — wait';
+      if(iBtn) iBtn.style.display='block';
+    } else {
+      btn.className='btn btn-disabled'; btn.textContent='Select dept first';
+    }
+  }
+  renderSchedQueue(room);
+}
+
+// ── SCHEDULE QUEUE ──
+function renderSchedQueue(room){
+  const dept=document.getElementById('dept-'+room).value;
+  const wrap=document.getElementById('sq-'+room);
+  const list=document.getElementById('sq-list-'+room);
+  const entries=Object.entries(schedules[room]).filter(([k,s])=>s.claimExpiry>Date.now()).sort((a,b)=>a[1].scheduledStart-b[1].scheduledStart);
+  if(!entries.length){ wrap.classList.remove('show'); return; }
+  wrap.classList.add('show');
+  list.innerHTML=entries.map(([key,s])=>{
+    const canDel=dept===s.dept;
+    const t=fmtDate(s.scheduledStart)+' · '+fmtTime(s.scheduledStart)+' – '+fmtTime(s.claimExpiry);
+    return '<div class="sched-item">'
+      +'<div class="sched-item-info"><strong>'+s.dept+'</strong>'+(s.meeting?' · '+s.meeting:'')+'</div>'
+      +'<span class="sched-item-time">'+t+'</span>'
+      +(canDel?'<button class="sched-item-del" onclick="cancelSched(\''+room+'\',\''+key+'\')">✕</button>':'')
+      +'</div>';
+  }).join('');
+}
+
+// ── TIMER BAR ──
+function updateTimer(room, remMs, totalMs){
+  const wrap=document.getElementById('timer-'+room);
+  const fill=document.getElementById('timer-fill-'+room);
+  const rem=document.getElementById('timer-rem-'+room);
+  if(remMs===null){ wrap.classList.remove('show'); return; }
+  wrap.classList.add('show');
+  if(remMs===-1){ rem.textContent='Until released'; fill.style.width='100%'; fill.className='timer-fill'; return; }
+  rem.textContent=fmtRem(remMs);
+  const pct=totalMs>0?Math.max(0,Math.min(100,(remMs/totalMs)*100)):100;
+  fill.style.width=pct+'%';
+  fill.className='timer-fill'+(pct<=10?' crit':pct<=25?' warn':'');
+}
+
+// ── MODE TOGGLE ──
+function setMode(room, m){
+  mode[room]=m;
+  document.getElementById('mode-now-'+room).classList.toggle('active',m==='now');
+  document.getElementById('mode-sched-'+room).classList.toggle('active',m==='sched');
+  // Close any open panels
+  closeDurPanel(room); closeSchedPanel(room);
+  renderRoom(room);
+}
+
+// ── DEPT CHANGE ──
+function onDeptChange(room){ closeDurPanel(room); closeSchedPanel(room); renderRoom(room); }
+
+// ── MAIN ACTION BUTTON ──
+function mainAction(room){
+  const btn=document.getElementById('btn-'+room);
+  if(!btn||btn.classList.contains('btn-disabled')) return;
+  const dept=document.getElementById('dept-'+room).value; if(!dept) return;
+  const a=active[room];
+  // Release
+  if(a&&a.dept===dept&&mode[room]==='now'){ releaseRoom(room); return; }
+  // Schedule
+  if(mode[room]==='sched'){ openSchedPanel(room); return; }
+  // Book Now — show duration panel
+  if(!a){ openDurPanel(room); }
+}
+
+// ── DURATION PANEL ──
+function openDurPanel(room){
+  // Build filtered options based on next scheduled slot
+  const nowMs=Date.now();
+  const ns=nextSched(room);
+  const sel=document.getElementById('dur-sel-'+room);
+  const lbl=document.getElementById('dur-label-'+room);
+  const ALL=[
+    {l:'15 minutes',v:'15 min',ms:900000},{l:'30 minutes',v:'30 min',ms:1800000},
+    {l:'45 minutes',v:'45 min',ms:2700000},{l:'1 hour',v:'1 hr',ms:3600000},
+    {l:'1.5 hours',v:'1.5 hrs',ms:5400000},{l:'2 hours',v:'2 hrs',ms:7200000},
+    {l:'3 hours',v:'3 hrs',ms:10800000},{l:'Until I release it',v:'Until released',ms:null}
+  ];
+  if(ns){
+    const maxMs=ns.scheduledStart-nowMs;
+    lbl.innerHTML='How long? <span style="color:var(--amber);font-size:11px">⚠ Free until '+fmtTime(ns.scheduledStart)+' ('+fmtRem(maxMs)+')</span>';
+    const valid=ALL.filter(o=>o.ms!==null&&o.ms<=maxMs);
+    let html='<option value="_max" data-ms="'+maxMs+'">Until '+fmtTime(ns.scheduledStart)+' ('+fmtRem(maxMs)+')</option>';
+    valid.forEach(o=>html+='<option value="'+o.v+'">'+o.l+'</option>');
+    sel.innerHTML=html; sel.value='_max';
+    // Hide custom input since we cap
+    document.getElementById('cust-gyaan'  ) && (document.getElementById('cust-gyaan').style.display='none');
+    document.getElementById('cust-dharma') && (document.getElementById('cust-dharma').style.display='none');
+  } else {
+    lbl.textContent='How long do you need '+ROOMS[room].label+'?';
+    let html='';
+    ALL.forEach(o=>html+='<option value="'+o.v+'"'+(o.v==='30 min'?' selected':'')+'>'+o.l+'</option>');
+    html+='<option value="custom">Custom…</option>';
+    sel.innerHTML=html; sel.value='30 min';
+  }
+  document.getElementById('dur-'+room).classList.add('show');
+}
+function closeDurPanel(room){
+  document.getElementById('dur-'+room).classList.remove('show');
+  document.getElementById('cust-'+room).style.display='none';
+  document.getElementById('cust-inp-'+room).value='';
+  renderRoom(room);
+}
+function onDurSelChange(room){
+  const v=document.getElementById('dur-sel-'+room).value;
+  const cw=document.getElementById('cust-'+room);
+  cw.style.display=(v==='custom')?'flex':'none';
+  if(v==='custom') document.getElementById('cust-inp-'+room).focus();
+}
+
+// ── CONFIRM BOOK ──
+function confirmBook(room){
+  const dept=document.getElementById('dept-'+room).value;
+  const meeting=document.getElementById('meeting-'+room).value.trim();
+  const bookedBy=document.getElementById('bookedby-'+room).value.trim();
+  if(!bookedBy){ showToast('Please enter your name (booked by)','red',3000); return; }
+  if(active[room]){
+    const occ=active[room];
+    showToast('Room is currently booked by '+occ.dept+(occ.claimExpiry?' until '+fmtTime(occ.claimExpiry):''),'red',4000); return;
+  }
+  const sel=document.getElementById('dur-sel-'+room);
+  const nowMs=Date.now();
+  let duration, claimExpiry;
+
+  if(sel.value==='_max'){
+    const ms=parseInt(sel.options[sel.selectedIndex].getAttribute('data-ms')||'0');
+    claimExpiry=nowMs+ms; duration='Until '+fmtTime(claimExpiry);
+  } else {
+    const custVal=document.getElementById('cust-inp-'+room).value.trim();
+    duration = custVal || sel.value;
+    const ms=parseMs(duration);
+    // Hard block if exceeds next scheduled
+    const ns=nextSched(room);
+    if(ns && ms && (nowMs+ms)>ns.scheduledStart){
+      showToast('⚠ Duration overlaps '+ns.dept+'\'s booking at '+fmtTime(ns.scheduledStart),'red',4000); return;
+    }
+    claimExpiry=ms?nowMs+ms:0;
+  }
+
+  const data={dept,since:tsNow(),duration,meeting:meeting||'',bookedBy,claimTime:nowMs,claimExpiry,invites:[]};
+  closeDurPanel(room);
+  db.ref('rooms/'+room+'/active').set(data)
+    .then(()=>{ addLog(room,dept,'Booked',duration,meeting,bookedBy,[]); showToast('✓ '+ROOMS[room].label+' booked!','green',2500); })
+    .catch(()=>showToast('Error — check connection','red',3500));
+}
+
+// ── SCHEDULE PANEL ──
+function openSchedPanel(room){
+  const d=document.getElementById('sd-date-'+room);
+  if(!d.value) d.value=new Date().toISOString().split('T')[0];
+  const ti=document.getElementById('sd-time-'+room);
+  if(!ti.value){ const nd=new Date(); nd.setMinutes(nd.getMinutes()+30); ti.value=nd.toTimeString().slice(0,5); }
+  document.getElementById('sched-'+room).classList.add('show');
+}
+function closeSchedPanel(room){
+  document.getElementById('sched-'+room).classList.remove('show');
+  document.getElementById('sd-cust-'+room).style.display='none';
+  document.getElementById('sd-cust-inp-'+room).value='';
+  renderRoom(room);
+}
+function onSchedDurChange(room){
+  const v=document.getElementById('sd-dur-'+room).value;
+  document.getElementById('sd-cust-'+room).style.display=(v==='custom')?'flex':'none';
+  if(v==='custom') document.getElementById('sd-cust-inp-'+room).focus();
+}
+
+// ── CONFIRM SCHEDULE ──
+function confirmSchedule(room){
+  const dept=document.getElementById('dept-'+room).value;
+  const meeting=document.getElementById('meeting-'+room).value.trim();
+  const bookedBy=document.getElementById('bookedby-'+room).value.trim();
+  if(!bookedBy){ showToast('Please enter your name (booked by)','red',3000); return; }
+  const dateVal=document.getElementById('sd-date-'+room).value;
+  const timeVal=document.getElementById('sd-time-'+room).value;
+  const durSel=document.getElementById('sd-dur-'+room).value;
+  const durCust=document.getElementById('sd-cust-inp-'+room).value.trim();
+  const durStr=durCust||(durSel==='custom'?'1 hr':durSel);
+  if(!dateVal||!timeVal){ showToast('Pick a date and start time','red',3000); return; }
+  const startMs=new Date(dateVal+'T'+timeVal).getTime();
+  if(startMs<=Date.now()){ showToast('Start time must be in the future','red',3000); return; }
+  const durMs=parseMs(durStr)||3600000;
+  const endMs=startMs+durMs;
+  // BUG FIX 1: block overlap with active booking
+  if(active[room]&&active[room].claimExpiry>0&&startMs<active[room].claimExpiry){
+    showToast('This slot conflicts with an active booking running until '+fmtTime(active[room].claimExpiry)+'. Please choose a later time.','red',5000); return;
+  }
+  // BUG FIX 3: block overlap with existing scheduled bookings
+  for(const [k,s] of Object.entries(schedules[room])){
+    if(startMs<s.claimExpiry&&endMs>s.scheduledStart){
+      showToast('This time is already booked by '+s.dept+' from '+fmtTime(s.scheduledStart)+' to '+fmtTime(s.claimExpiry)+'. Choose a different slot.','red',5000); return;
+    }
+  }
+  const key=genId();
+  const data={dept,meeting:meeting||'',bookedBy,duration:durStr,scheduledStart:startMs,claimExpiry:endMs,createdAt:Date.now(),invites:[]};
+  db.ref('rooms/'+room+'/schedules/'+key).set(data)
+    .then(()=>{ addLog(room,dept,'Scheduled '+fmtDate(startMs)+' '+fmtTime(startMs),durStr,meeting,bookedBy,[]); showToast('✓ Scheduled for '+fmtDate(startMs)+' at '+fmtTime(startMs),'green',3000); closeSchedPanel(room); })
+    .catch(()=>showToast('Error — check connection','red',3500));
+}
+
+// ── CANCEL SCHEDULED ──
+function cancelSched(room,key){
+  const s=schedules[room][key]; if(!s) return;
+  db.ref('rooms/'+room+'/schedules/'+key).remove()
+    .then(()=>{ addLog(room,s.dept,'Schedule cancelled',null,s.meeting,s.bookedBy||'',s.invites||[]); showToast('✓ Schedule cancelled','',2500); })
+    .catch(()=>showToast('Error — check connection','red',3500));
+}
+
+// ── RELEASE ──
+function releaseRoom(room){
+  const dept=document.getElementById('dept-'+room).value;
+  const a=active[room];
+  db.ref('rooms/'+room+'/active').remove()
+    .then(()=>{ addLog(room,dept,'Released',null,a?a.meeting:'',a?a.bookedBy||'':'',a?a.invites||[]:[]); showToast('✓ '+ROOMS[room].label+' released','',2500); })
+    .catch(()=>showToast('Error — check connection','red',3500));
+}
+
+// ── EXTEND ──
+function buildExtOptions(room){
+  const a=active[room]; if(!a||!a.claimExpiry) return;
+  const ns=nextSched(room);
+  const sel=document.getElementById('ext-sel-'+room);
+  const msg=document.getElementById('ext-msg-'+room);
+  const ALL=[
+    {l:'+15 min',v:'15 min',ms:900000},{l:'+30 min',v:'30 min',ms:1800000},
+    {l:'+45 min',v:'45 min',ms:2700000},{l:'+1 hr',v:'1 hr',ms:3600000},
+    {l:'+2 hrs',v:'2 hrs',ms:7200000},{l:'+4 hrs',v:'4 hrs',ms:14400000}
+  ];
+  if(ns){
+    const gap=ns.scheduledStart-Math.max(a.claimExpiry,Date.now());
+    const valid=ALL.filter(o=>o.ms<=gap);
+    if(!valid.length){ document.getElementById('ext-'+room).classList.remove('show'); return; }
+    let html='<option value="_max" data-ms="'+gap+'">Until '+fmtTime(ns.scheduledStart)+' (+'+fmtRem(gap)+')</option>';
+    html+=valid.map(o=>'<option value="'+o.v+'">'+o.l+'</option>').join('');
+    sel.innerHTML=html; sel.value='_max';
+    document.getElementById('ext-cust-'+room).style.display='none';
+    if(msg) msg.textContent='Can only extend until '+fmtTime(ns.scheduledStart)+' — next booking starts then.';
+  } else {
+    let html=ALL.map(o=>'<option value="'+o.v+'"'+(o.v==='30 min'?' selected':'')+'>'+o.l+'</option>').join('');
+    html+='<option value="custom">Custom…</option>';
+    sel.innerHTML=html; sel.value='30 min';
+    if(msg) msg.textContent='';
+  }
+}
+function onExtSelChange(room){
+  const v=document.getElementById('ext-sel-'+room).value;
+  const cw=document.getElementById('ext-cust-'+room);
+  cw.style.display=(v==='custom')?'flex':'none';
+  if(v==='custom') document.getElementById('ext-cust-inp-'+room).focus();
+}
+function extendBook(room){
+  const a=active[room]; if(!a||!a.claimExpiry) return;
+  const sel=document.getElementById('ext-sel-'+room);
+  let addMs, addDur;
+  if(sel.value==='_max'){
+    addMs=parseInt(sel.options[sel.selectedIndex].getAttribute('data-ms')||'0');
+    addDur='+'+fmtRem(addMs);
+  } else {
+    const cust=document.getElementById('ext-cust-inp-'+room).value.trim();
+    addDur=cust||(sel.value==='custom'?'30 min':sel.value);
+    addMs=parseMs(addDur);
+  }
+  if(!addMs){ showToast('Invalid duration','red',2500); return; }
+  const newExpiry=Math.max(a.claimExpiry,Date.now())+addMs;
+  const ns=nextSched(room);
+  if(ns&&newExpiry>ns.scheduledStart){ showToast('Can only extend until '+fmtTime(ns.scheduledStart)+' — next booking starts then','red',4000); return; }
+  db.ref('rooms/'+room+'/active').update({claimExpiry:newExpiry,duration:(a.duration||'')+' '+addDur})
+    .then(()=>{ addLog(room,a.dept,'Extended by '+addDur,null,a.meeting,a.bookedBy||'',a.invites||[]); showToast('✓ Extended by '+addDur,'green',2500); closeExt(room); })
+    .catch(()=>showToast('Error — check connection','red',3500));
+}
+function closeExt(room){
+  document.getElementById('ext-'+room).classList.remove('show');
+  document.getElementById('ext-sel-'+room).value='30 min';
+  document.getElementById('ext-cust-'+room).style.display='none';
+  document.getElementById('ext-cust-inp-'+room).value='';
+}
+
+// ── LOG ──
+function renderLog(){
+  db.ref('log').once('value').then(snap=>{
+    const el=document.getElementById('log-list');
+    if(!snap.exists()){ el.innerHTML='<div class="no-log">No activity yet.</div>'; return; }
+    const logs=Object.values(snap.val());
+    if(!logs.length){ el.innerHTML='<div class="no-log">No activity yet.</div>'; return; }
+    el.innerHTML=logs.slice(-15).reverse().map(l=>{
+      const good=l.action==='Booked'||l.action.startsWith('Sched')||l.action.startsWith('Ext')||l.action.startsWith('Auto');
+      const mtg=l.meeting?'<span class="lm">'+l.meeting+'</span>':'';
+      const rl='<span class="lroom">'+(ROOMS[l.room]?ROOMS[l.room].label:l.room)+'</span>';
+      return '<div class="log-item">'+rl+'<span class="ld">'+l.dept+'</span>'+mtg+'<span class="'+(good?'lc':'lr')+'">'+l.action+'</span><span class="lt">'+l.time+'</span></div>';
+    }).join('');
+  });
+}
+function addLog(room,dept,action,duration,meeting,bookedBy,invites){
+  db.ref('log').once('value').then(snap=>{
+    const logs=snap.exists()?Object.values(snap.val()):[];
+    logs.push({room,dept,action:action||'',duration:duration||'',meeting:meeting||'',bookedBy:bookedBy||'',invites:invites||[],time:tsNow()});
+    if(logs.length>80) logs.splice(0,logs.length-80);
+    const obj={}; logs.forEach((l,i)=>obj[i]=l);
+    db.ref('log').set(obj);
+  });
+}
+
+// ── FIREBASE REAL-TIME LISTENERS ──
+for(const room of ['gyaan','dharma']){
+  // Active booking
+  db.ref('rooms/'+room+'/active').on('value', snap=>{
+    const data=snap.exists()?snap.val():null;
+    if(data&&data.claimExpiry&&data.claimExpiry>0&&Date.now()>=data.claimExpiry){
+      db.ref('rooms/'+room+'/active').remove();
+      addLog(room,data.dept,'Auto-released (expired)',null,data.meeting,data.bookedBy||'',data.invites||[]);
+      active[room]=null;
+    } else {
+      active[room]=data;
+    }
+    renderRoom(room); updateTicker(); updateTimer(room,null,null);
+  });
+
+  // Schedules
+  db.ref('rooms/'+room+'/schedules').on('value', snap=>{
+    schedules[room]={};
+    if(snap.exists()) snap.forEach(c=>{ schedules[room][c.key]=c.val(); });
+    renderRoom(room); updateTicker();
+  });
+}
+
+// Log listener — re-render whenever log changes
+db.ref('log').on('value', ()=>renderLog());
+
+// ── 1s TICK: countdown + auto-start scheduled meetings ──
+setInterval(()=>{
+  const nowMs=Date.now();
+  for(const room of ['gyaan','dharma']){
+    const a=active[room];
+
+    // Active booking countdown
+    if(a){
+      if(a.claimExpiry&&a.claimExpiry>0){
+        const rem=a.claimExpiry-nowMs;
+        if(rem<=0){
+          db.ref('rooms/'+room+'/active').remove();
+          addLog(room,a.dept,'Auto-released (expired)',null,a.meeting,a.bookedBy||'',a.invites||[]);
+          active[room]=null; renderRoom(room); updateTicker(); updateTimer(room,null,null);
+          showToast(ROOMS[room].label+' booking expired — room released','amber',3000);
+        } else {
+          const inf=document.getElementById('info-'+room);
+          if(inf) inf.textContent='Booked · '+a.dept+(a.meeting?' · '+a.meeting:'')+(a.duration?' · '+a.duration:'')+' · '+fmtRem(rem)+' left';
+          updateTimer(room,rem,a.claimExpiry-a.claimTime);
+        }
+      } else { updateTimer(room,-1,null); }
+    } else {
+      updateTimer(room,null,null);
+      // Auto-start any due scheduled meetings
+      for(const [key,s] of Object.entries(schedules[room])){
+        if(s.scheduledStart<=nowMs&&s.claimExpiry>nowMs){
+          if(!active[room]){
+            const act={dept:s.dept,since:tsNow(),duration:s.duration,meeting:s.meeting,claimTime:nowMs,claimExpiry:s.claimExpiry};
+            db.ref('rooms/'+room+'/active').set(act);
+            addLog(room,s.dept,'Auto-started (scheduled)',s.duration,s.meeting,s.bookedBy||'',s.invites||[]);
+            showToast('🚀 '+ROOMS[room].label+' · '+s.dept+' started automatically','green',4000);
+          }
+          db.ref('rooms/'+room+'/schedules/'+key).remove();
+          break;
+        } else if(s.claimExpiry<=nowMs){
+          db.ref('rooms/'+room+'/schedules/'+key).remove();
+        }
+      }
+      // Update info with next scheduled
+      const ns=nextSched(room);
+      if(ns){
+        const toStart=ns.scheduledStart-nowMs;
+        const inf=document.getElementById('info-'+room);
+        if(inf&&toStart>0) inf.textContent=ROOMS[room].label+' free until '+fmtTime(ns.scheduledStart)+' · '+ns.dept+(ns.meeting?' · '+ns.meeting:'')+' in '+fmtRem(toStart);
+      }
+    }
+  }
+},1000);
+
+// ── INVITE MODAL ──
+let _iRoom=null, _iEmails=[];
+function openInviteModal(r){
+  _iRoom=r; _iEmails=[];
+  document.getElementById('tag-wrap').querySelectorAll('.tag-pill').forEach(p=>p.remove());
+  document.getElementById('tag-inp').value='';
+  document.getElementById('inv-from').value='';
+  document.getElementById('copy-ok').textContent='';
+  document.getElementById('btn-outlook').disabled=true;
+  _iPreview();
+  document.getElementById('inv-modal').classList.add('open');
+}
+function closeInvModal(){
+  document.getElementById('inv-modal').classList.remove('open');
+  _iRoom=null; _iEmails=[];
+}
+function handleTagKey(e){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const v=document.getElementById('tag-inp').value.trim().replace(/,$/,'');
+    if(v&&v.includes('@')){ _addTag(v); document.getElementById('tag-inp').value=''; }
+  }
+}
+function _addTag(em){
+  _iEmails.push(em);
+  const tw=document.getElementById('tag-wrap');
+  const p=document.createElement('span'); p.className='tag-pill';
+  p.innerHTML=em+' <button type="button" onclick="_rmTag(this,''+em+'')">&#xD7;</button>';
+  tw.insertBefore(p,document.getElementById('tag-inp'));
+  document.getElementById('btn-outlook').disabled=false;
+  _iPreview();
+}
+function _rmTag(b,em){
+  _iEmails=_iEmails.filter(e=>e!==em); b.parentElement.remove();
+  document.getElementById('btn-outlook').disabled=_iEmails.length===0;
+  _iPreview();
+}
+function _iPreview(){
+  if(!_iRoom) return;
+  const a=active[_iRoom], rl=ROOMS[_iRoom]?ROOMS[_iRoom].label:_iRoom;
+  const fl=_iRoom==='gyaan'?'2nd Floor':'1st Floor';
+  const mtg=a?a.meeting||'(no subject)':'(no subject)';
+  const by=a?a.bookedBy||'—':'—';
+  const t=a?(fmtDate(a.claimTime)+' '+fmtTime(a.claimTime)+(a.claimExpiry?' – '+fmtTime(a.claimExpiry):'')):'';
+  document.getElementById('inv-preview').textContent=
+    'Subject:   Meeting invite — '+mtg+'\n'+
+    'Room:      '+rl+', '+fl+'\n'+
+    'Time:      '+t+'\n'+
+    'Booked by: '+by+'\n\n'+
+    'You are invited to attend the above meeting.\n'+
+    'Please confirm your attendance.';
+}
+function copyInv(){
+  navigator.clipboard.writeText(document.getElementById('inv-preview').textContent).then(()=>{
+    document.getElementById('copy-ok').textContent='Copied!';
+    setTimeout(()=>document.getElementById('copy-ok').textContent='',2000);
+  });
+}
+function openOutlook(){
+  const txt=document.getElementById('inv-preview').textContent;
+  const mtg=active[_iRoom]?active[_iRoom].meeting||'Meeting':'Meeting';
+  window.location.href='mailto:'+_iEmails.join(',')+'?subject='+encodeURIComponent('Meeting invite — '+mtg)+'&body='+encodeURIComponent(txt);
+  if(active[_iRoom]) db.ref('rooms/'+_iRoom+'/active').update({invites:_iEmails});
+}
+function toggleAtt(id){
+  const el=document.getElementById(id);
+  if(el) el.style.display=el.style.display==='none'?'inline':'none';
+}
+</script>
+</body>
+</html>
